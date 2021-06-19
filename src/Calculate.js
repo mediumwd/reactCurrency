@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { fetchCurrencies } from "./store/actions/currenciesActions";
+import { fetchCurrencies, calculate, updateValues } from "./store/actions/currenciesActions";
+
 class Calculate extends Component {
   componentDidMount() {
     this.props.fetchCurrencies();
@@ -8,39 +9,64 @@ class Calculate extends Component {
 
   render() {
 
-    const { currencies, loading, error } = this.props;
+    const { currencies, loading, error, from, to, amount, calc } = this.props;
     return (
-      <form>
+      <form 
+      onSubmit={calculate(from,to,amount)}
+      >
+      <div className="mainform">
+      
         {loading && <div>LOADING...</div>}
         {error && <div>{error}</div>}
         <span>Convert</span>
-        <input type="number" step="0.01" />
-        <select name="from">
+        <div className="d-flex">
+        <input 
+          type="number" 
+          step="0.01"
+          min='0.01'
+          onChange={updateValues(from,to,amount)}
+        />
+        <select 
+         name="from"
+         className="w-100"
+         onChange={updateValues(from,to,amount)}
+        >
           <option value="" key="" disabled defaultValue hidden></option>
           {Object.values(currencies).map(cur => (
-            <option value={cur.id} key={cur.id}>{cur.currencyName}</option>
+            <option value={cur.id} key={cur.id}>{cur.id}</option>
           ))}
         </select>
+        </div>
         <span>to</span>
-        <select name="to">
+        <select name="to"
+        onChange={updateValues(from,to,amount)}
+        >
           <option value="" key="" disabled defaultValue hidden>Select curency</option>
           {Object.values(currencies).map(cur => (
-            <option value={cur.id} key={cur.id}>{cur.currencyName}</option>
+            <option value={cur.id} key={cur.id}>{cur.id}</option>
           ))}
         </select>
-        <input 
-          type="submit" value="Transform"  />
+        <input type="button" value="Transform" 
+        onClick={calculate(from,to,1)}
+         />
+      
+      {calculate && <div>{calculate}</div>}
+      </div>
       </form>
     );
   }
 }
 
 const mapStateToProps = state => {
-  const { currencies, loading, error } = state.currencies;
+  const { currencies, loading, error, from, to, amount, calc } = state.currencies;
   return {
-    currencies,
-    loading,
-    error
+    currencies, 
+    loading, 
+    error, 
+    from, 
+    to, 
+    amount,
+    calc
   };
 };
 
@@ -48,5 +74,7 @@ export default connect(
   mapStateToProps,
   {
     fetchCurrencies,
+    calculate,
+    updateValues
   }
 )(Calculate);
